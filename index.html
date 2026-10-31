@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="km" class="h-full overflow-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>អាល់ប៊ុមរូបថតអនុស្សាវរីយ៍ - Slider Pre-Wedding Album</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#FAF8F5',
+                            100: '#F3EFEA',
+                            400: '#D4AF37',
+                            500: '#C59B27',
+                            900: '#121212'
+                        }
+                    },
+                    fontFamily: {
+                        khmer: ['Kantumruuy Pro', 'Battambang', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'Battambang', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Kantumruuy+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body, html {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Kantumruuy Pro', sans-serif;
+            user-select: none;
+        }
+
+        /* Ambient floating background particles canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Hide Scrollbar for Horizontal Deck */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .filter-btn.active {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .dark .filter-btn.active {
+            background-color: #D4AF37;
+            color: #121212;
+        }
+
+        .thumb-item.active {
+            border-color: #D4AF37;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        /* Fade animation for slider content */
+        .slide-fade-enter {
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-brand-50 text-gray-800 dark:bg-brand-900 dark:text-gray-100 h-full flex flex-col justify-between relative selection:bg-brand-400 selection:text-white">
+
+    <!-- Particle Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- 1. TOP HEADER & NAVIGATION -->
+    <header class="relative z-20 w-full px-4 sm:px-8 py-3 flex items-center justify-between border-b border-gray-200/50 dark:border-gray-800/50 bg-brand-50/80 dark:bg-brand-900/80 backdrop-blur-md">
+        <!-- Logo / Title -->
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-full border border-brand-400 text-brand-400 flex items-center justify-center text-xs shadow-sm">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div>
+                <h1 class="font-serif text-base sm:text-lg font-semibold tracking-wide text-gray-900 dark:text-white">រតនៈ &amp; សុភា</h1>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest -mt-1">Pre-Wedding Album</p>
+            </div>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="hidden md:flex items-center space-x-1.5 text-xs">
+            <button onclick="setFilter('all')" class="filter-btn active px-3.5 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium transition-all">
+                ទាំងអស់
+            </button>
+            <button onclick="setFilter('traditional')" class="filter-btn px-3.5 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium transition-all">
+                ឈុតប្រពៃណី
+            </button>
+            <button onclick="setFilter('modern')" class="filter-btn px-3.5 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium transition-all">
+                ឈុតសម័យ
+            </button>
+            <button onclick="setFilter('candid')" class="filter-btn px-3.5 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium transition-all">
+                ក្រៅឆាក/ធម្មជាតិ
+            </button>
+            <button onclick="setFilter('fav')" class="filter-btn px-3.5 py-1.5 rounded-full border border-red-300 text-red-500 font-medium transition-all flex items-center space-x-1">
+                <i class="fas fa-heart text-[10px]"></i>
+                <span>ចូលចិត្ត</span>
+            </button>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center space-x-2">
+            <button id="autoplay-btn" onclick="toggleAutoPlay()" title="Auto Play" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-xs text-gray-600 dark:text-gray-300 hover:border-brand-400 transition-colors">
+                <i class="fas fa-play"></i>
+            </button>
+
+            <button onclick="openUploadModal()" class="bg-brand-400 hover:bg-brand-500 text-white text-xs px-3.5 py-1.5 sm:py-2 rounded-full font-medium shadow-sm transition-all flex items-center space-x-1.5 active:scale-95">
+                <i class="fas fa-plus text-[10px]"></i>
+                <span class="hidden sm:inline">បន្ថែមរូប</span>
+            </button>
+
+            <button onclick="toggleDarkMode()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-xs text-gray-600 dark:text-gray-300 hover:border-brand-400 transition-colors">
+                <i id="theme-icon" class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Category Filter Bar -->
+    <div class="md:hidden relative z-20 w-full px-4 py-2 border-b border-gray-200/40 dark:border-gray-800/40 flex items-center justify-center space-x-1 text-[11px] overflow-x-auto no-scrollbar">
+        <button onclick="setFilter('all')" class="filter-btn active px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap">ទាំងអស់</button>
+        <button onclick="setFilter('traditional')" class="filter-btn px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap">ឈុតប្រពៃណី</button>
+        <button onclick="setFilter('modern')" class="filter-btn px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap">ឈុតសម័យ</button>
+        <button onclick="setFilter('candid')" class="filter-btn px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap">ក្រៅឆាក/ធម្មជាតិ</button>
+        <button onclick="setFilter('fav')" class="filter-btn px-3 py-1 rounded-full border border-red-300 text-red-500 whitespace-nowrap"><i class="fas fa-heart text-[9px] mr-1"></i>ចូលចិត្ត</button>
+    </div>
+
+    <!-- 2. MAIN CAROUSEL DISPLAY SLIDER -->
+    <main class="relative z-10 flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-center overflow-hidden">
+        
+        <!-- Navigation Prev Button -->
+        <button onclick="prevSlide()" class="absolute left-2 sm:left-4 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/70 dark:bg-black/50 hover:bg-white dark:hover:bg-black text-gray-700 dark:text-white shadow-lg backdrop-blur-md flex items-center justify-center transition-all border border-gray-200/50 dark:border-gray-700/50 hover:scale-105 active:scale-95">
+            <i class="fas fa-chevron-left text-sm sm:text-base"></i>
+        </button>
+
+        <!-- Slide Content Wrapper -->
+        <div id="slider-card" class="w-full h-full max-h-[68vh] sm:max-h-[72vh] flex flex-col md:flex-row bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-gray-200/60 dark:border-gray-800 overflow-hidden slide-fade-enter">
+            <!-- Photo Box -->
+            <div class="w-full md:w-3/5 h-1/2 md:h-full bg-black/40 relative flex items-center justify-center overflow-hidden group cursor-pointer" onclick="openLightboxCurrent()">
+                <img id="slide-img" src="" alt="Pre-wedding photo" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105">
+                <span class="absolute top-3 left-3 text-[10px] bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-full uppercase tracking-wider font-medium border border-white/10">
+                    <span id="slide-category">Category</span>
+                </span>
+                <span class="absolute bottom-3 right-3 text-xs bg-black/40 backdrop-blur-md text-white/80 px-2.5 py-1 rounded-full flex items-center space-x-1">
+                    <i class="fas fa-expand text-[10px]"></i>
+                    <span class="text-[10px]">ពង្រីក</span>
+                </span>
+            </div>
+
+            <!-- Details & Memory Note Box -->
+            <div class="w-full md:w-2/5 h-1/2 md:h-full p-5 sm:p-7 flex flex-col justify-between overflow-y-auto no-scrollbar">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+                        <span id="slide-index-counter" class="text-xs font-mono text-brand-400 font-semibold tracking-wider">01 / 05</span>
+                        <span id="slide-date" class="text-xs text-gray-400 flex items-center"><i class="far fa-calendar-alt mr-1"></i> Date</span>
+                    </div>
+
+                    <h2 id="slide-title" class="font-serif text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white leading-tight">
+                        Title
+                    </h2>
+
+                    <div class="space-y-1.5">
+                        <span class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">អនុស្សាវរីយ៍ / Memory Note</span>
+                        <p id="slide-note" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-light italic leading-relaxed bg-brand-50/60 dark:bg-white/5 p-4 rounded-xl border border-gray-200/40 dark:border-gray-700/30">
+                            "Note"
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card Bottom Actions -->
+                <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-4 mt-2">
+                    <button id="slide-fav-btn" onclick="toggleFavCurrent()" class="flex items-center space-x-2 text-gray-400 hover:text-red-500 transition-colors text-xs font-medium">
+                        <i id="slide-fav-icon" class="fas fa-heart text-base"></i>
+                        <span id="slide-fav-text">ចូលចិត្ត</span>
+                    </button>
+
+                    <button id="slide-del-btn" onclick="deleteCurrent()" class="text-xs text-red-400 hover:text-red-600 transition-colors hidden flex items-center space-x-1">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>លុបរូប</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Next Button -->
+        <button onclick="nextSlide()" class="absolute right-2 sm:right-4 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/70 dark:bg-black/50 hover:bg-white dark:hover:bg-black text-gray-700 dark:text-white shadow-lg backdrop-blur-md flex items-center justify-center transition-all border border-gray-200/50 dark:border-gray-700/50 hover:scale-105 active:scale-95">
+            <i class="fas fa-chevron-right text-sm sm:text-base"></i>
+        </button>
+
+        <!-- Empty Filter State -->
+        <div id="empty-state" class="hidden text-center py-16 text-gray-400 space-y-3">
+            <i class="far fa-images text-4xl"></i>
+            <p class="text-sm">មិនទាន់មានរូបថតនៅក្នុងជំពូកនេះទេ</p>
+        </div>
+    </main>
+
+    <!-- 3. BOTTOM THUMBNAIL STRIP -->
+    <footer class="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-8 py-3">
+        <div id="thumb-container" class="flex items-center justify-center space-x-2 overflow-x-auto no-scrollbar py-1">
+            <!-- Thumbnail cards injected dynamically -->
+        </div>
+    </footer>
+
+    <!-- 4. FULLSCREEN LIGHTBOX MODAL -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/95 hidden backdrop-blur-md flex items-center justify-center p-4 transition-opacity">
+        <button onclick="closeLightbox()" class="absolute top-5 right-5 text-white/70 hover:text-white text-2xl z-50 p-2">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="lb-img" src="" class="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl">
+    </div>
+
+    <!-- 5. UPLOAD PHOTO MODAL -->
+    <div id="upload-modal" class="fixed inset-0 z-50 bg-black/70 hidden backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-brand-900 max-w-md w-full rounded-2xl p-6 relative shadow-2xl border border-gray-200 dark:border-gray-800">
+            <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <h3 class="font-serif text-xl text-gray-900 dark:text-white mb-4">បន្ថែមរូបថតអនុស្សាវរីយ៍</h3>
+
+            <form onsubmit="handleSavePhoto(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-gray-600 dark:text-gray-300 mb-1">ជ្រើសរើសរូបថត (Upload File) *</label>
+                    <input type="file" id="file-input" accept="image/*" onchange="previewFile(event)" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:bg-brand-400/10 file:text-brand-400 hover:file:bg-brand-400 hover:file:text-white transition-all cursor-pointer">
+                </div>
+
+                <div>
+                    <label class="block text-gray-600 dark:text-gray-300 mb-1">ចំណងជើងរូបថត *</label>
+                    <input type="text" id="title-input" required placeholder="ឧទាហរណ៍៖ ស្នាមញញឹមដំបូង" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-black/40 focus:outline-none focus:border-brand-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-gray-600 dark:text-gray-300 mb-1">ជំពូក *</label>
+                        <select id="category-input" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-black/40 focus:outline-none focus:border-brand-400">
+                            <option value="traditional">ឈុតប្រពៃណី</option>
+                            <option value="modern">ឈុតសម័យ</option>
+                            <option value="candid">ក្រៅឆាក/ធម្មជាតិ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 dark:text-gray-300 mb-1">កាលបរិច្ឆេទ</label>
+                        <input type="date" id="date-input" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-black/40 focus:outline-none focus:border-brand-400">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-600 dark:text-gray-300 mb-1">កំណត់ត្រាអនុស្សាវរីយ៍ (Note)</label>
+                    <textarea id="note-input" rows="3" placeholder="សរសេរពាក្យពេចន៍ចងចាំ..." class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-black/40 focus:outline-none focus:border-brand-400 resize-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-brand-400 hover:bg-brand-500 text-white font-medium transition-all shadow-md">
+                    រក្សាទុក
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT SLIDER ENGINE & CONTROLS -->
+    <script>
+        // Default Photos
+        const samplePhotos = [
+            {
+                id: '1',
+                title: 'ឈុតប្រពៃណីខ្មែរ',
+                category: 'traditional',
+                categoryLabel: 'ឈុតប្រពៃណី',
+                src: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80',
+                date: '2026-05-10',
+                note: 'ការថតរូបក្នុងឈុតបុរាណខ្មែរ ក្រោមពន្លឺថ្ងៃដ៏ស្រទន់ ពេញដោយស្នាមញញឹម។',
+                isFav: true,
+                isCustom: false
+            },
+            {
+                id: '2',
+                title: 'រាត្រីថ្ងៃលិចនៅមាត់ឆ្នេរ',
+                category: 'candid',
+                categoryLabel: 'ក្រៅឆាក/ធម្មជាតិ',
+                src: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
+                date: '2026-06-15',
+                note: 'ស្នាមញញឹម និងខ្យល់សមុទ្របក់ត្រជាក់ល្ហឹម នាពេលថ្ងៃលិច។',
+                isFav: false,
+                isCustom: false
+            },
+            {
+                id: '3',
+                title: 'ស្ទាយបែបទំនើប Modern',
+                category: 'modern',
+                categoryLabel: 'ឈុតសម័យ',
+                src: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1200&q=80',
+                date: '2026-07-20',
+                note: 'ភាពសាមញ្ញតែពេញដោយភាពស៊ីវិល័យ ជាមួយសំលៀកបំពាក់ពណ៌សចាំងចែង។',
+                isFav: true,
+                isCustom: false
+            },
+            {
+                id: '4',
+                title: 'អនុស្សាវរីយ៍សួនច្បារ',
+                category: 'candid',
+                categoryLabel: 'ក្រៅឆាក/ធម្មជាតិ',
+                src: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80',
+                date: '2026-08-05',
+                note: 'ដើរលេងកម្សាន្តក្នុងសួនធម្មជាតិ បង្កើតការចងចាំដ៏ផ្អែមល្ហែម។',
+                isFav: false,
+                isCustom: false
+            }
+        ];
+
+        let photos = [];
+        let filteredPhotos = [];
+        let currentIndex = 0;
+        let activeFilter = 'all';
+        let isAutoPlay = false;
+        let autoPlayTimer = null;
+        let uploadedBase64 = '';
+
+        // Touch gesture variables
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        window.onload = function() {
+            loadPhotos();
+            applyFilter('all');
+            initParticles();
+            setupSwipe();
+            setupKeyboard();
+        };
+
+        function loadPhotos() {
+            const saved = localStorage.getItem('horizontal_wedding_photos');
+            if (saved) {
+                try { photos = JSON.parse(saved); } catch(e) { photos = [...samplePhotos]; }
+            } else {
+                photos = [...samplePhotos];
+            }
+        }
+
+        function savePhotos() {
+            localStorage.setItem('horizontal_wedding_photos', JSON.stringify(photos));
+        }
+
+        /* FILTER SYSTEM */
+        function setFilter(cat) {
+            activeFilter = cat;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (event && event.target) {
+                const btn = event.target.closest('.filter-btn');
+                if (btn) btn.classList.add('active');
+            }
+            applyFilter(cat);
+        }
+
+        function applyFilter(cat) {
+            if (cat === 'all') filteredPhotos = photos;
+            else if (cat === 'fav') filteredPhotos = photos.filter(p => p.isFav);
+            else filteredPhotos = photos.filter(p => p.category === cat);
+
+            currentIndex = 0;
+            renderSlide();
+            renderThumbnails();
+        }
+
+        /* SLIDER RENDER ENGINE */
+        function renderSlide() {
+            const card = document.getElementById('slider-card');
+            const empty = document.getElementById('empty-state');
+
+            if (filteredPhotos.length === 0) {
+                card.classList.add('hidden');
+                empty.classList.remove('hidden');
+                document.getElementById('thumb-container').innerHTML = '';
+                return;
+            } else {
+                card.classList.remove('hidden');
+                empty.classList.add('hidden');
+            }
+
+            const current = filteredPhotos[currentIndex];
+
+            // Re-trigger fade animation
+            card.classList.remove('slide-fade-enter');
+            void card.offsetWidth; 
+            card.classList.add('slide-fade-enter');
+
+            document.getElementById('slide-img').src = current.src;
+            document.getElementById('slide-title').innerText = current.title;
+            document.getElementById('slide-category').innerText = current.categoryLabel || current.category;
+            document.getElementById('slide-date').innerHTML = `<i class="far fa-calendar-alt mr-1"></i> ${current.date || 'មិនមានកាលបរិច្ឆេទ'}`;
+            document.getElementById('slide-note').innerText = current.note ? `"${current.note}"` : '"គ្មានកំណត់ត្រា"';
+            document.getElementById('slide-index-counter').innerText = `${String(currentIndex + 1).padStart(2, '0')} / ${String(filteredPhotos.length).padStart(2, '0')}`;
+
+            // Favorite button state
+            const favIcon = document.getElementById('slide-fav-icon');
+            const favText = document.getElementById('slide-fav-text');
+            if (current.isFav) {
+                favIcon.className = "fas fa-heart text-base text-red-500";
+                favText.className = "text-red-500 font-medium";
+            } else {
+                favIcon.className = "fas fa-heart text-base text-gray-300 dark:text-gray-600";
+                favText.className = "text-gray-400";
+            }
+
+            // Custom delete button
+            const delBtn = document.getElementById('slide-del-btn');
+            if (current.isCustom) delBtn.classList.remove('hidden');
+            else delBtn.classList.add('hidden');
+
+            updateThumbnailActiveState();
+        }
+
+        function renderThumbnails() {
+            const container = document.getElementById('thumb-container');
+            container.innerHTML = '';
+
+            filteredPhotos.forEach((photo, idx) => {
+                const thumb = document.createElement('div');
+                thumb.className = `thumb-item w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-2 border-transparent opacity-60 hover:opacity-100 transition-all cursor-pointer flex-shrink-0 bg-black ${idx === currentIndex ? 'active' : ''}`;
+                thumb.onclick = () => goToSlide(idx);
+                thumb.innerHTML = `<img src="${photo.src}" class="w-full h-full object-cover">`;
+                container.appendChild(thumb);
+            });
+        }
+
+        function updateThumbnailActiveState() {
+            const items = document.querySelectorAll('.thumb-item');
+            items.forEach((item, idx) => {
+                if (idx === currentIndex) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        /* NAVIGATION CONTROLS */
+        function nextSlide() {
+            if (filteredPhotos.length === 0) return;
+            currentIndex = (currentIndex + 1) % filteredPhotos.length;
+            renderSlide();
+        }
+
+        function prevSlide() {
+            if (filteredPhotos.length === 0) return;
+            currentIndex = (currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
+            renderSlide();
+        }
+
+        function goToSlide(idx) {
+            currentIndex = idx;
+            renderSlide();
+        }
+
+        /* FAVORITE & DELETE */
+        function toggleFavCurrent() {
+            const current = filteredPhotos[currentIndex];
+            if (current) {
+                current.isFav = !current.isFav;
+                savePhotos();
+                renderSlide();
+            }
+        }
+
+        function deleteCurrent() {
+            const current = filteredPhotos[currentIndex];
+            if (current && confirm('តើអ្នកពិតជាចង់លុបរូបថតនេះមែនទេ?')) {
+                photos = photos.filter(p => p.id !== current.id);
+                savePhotos();
+                applyFilter(activeFilter);
+            }
+        }
+
+        /* AUTOPLAY SLIDESHOW */
+        function toggleAutoPlay() {
+            const btn = document.getElementById('autoplay-btn');
+            isAutoPlay = !isAutoPlay;
+            if (isAutoPlay) {
+                btn.classList.add('border-brand-400', 'text-brand-400');
+                btn.innerHTML = `<i class="fas fa-pause"></i>`;
+                autoPlayTimer = setInterval(nextSlide, 3500);
+            } else {
+                btn.classList.remove('border-brand-400', 'text-brand-400');
+                btn.innerHTML = `<i class="fas fa-play"></i>`;
+                clearInterval(autoPlayTimer);
+            }
+        }
+
+        /* LIGHTBOX */
+        function openLightboxCurrent() {
+            const current = filteredPhotos[currentIndex];
+            if (current) {
+                document.getElementById('lb-img').src = current.src;
+                document.getElementById('lightbox').classList.remove('hidden');
+            }
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+        }
+
+        /* UPLOAD PHOTO MODAL */
+        function openUploadModal() {
+            document.getElementById('upload-modal').classList.remove('hidden');
+        }
+        function closeUploadModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+            uploadedBase64 = '';
+        }
+        function previewFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    uploadedBase64 = evt.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        function handleSavePhoto(e) {
+            e.preventDefault();
+            if (!uploadedBase64) {
+                alert("សូមជ្រើសរើសរូបថតជាមុនសិន!");
+                return;
+            }
+
+            const catMap = {
+                traditional: 'ឈុតប្រពៃណី',
+                modern: 'ឈុតសម័យ',
+                candid: 'ក្រៅឆាក/ធម្មជាតិ'
+            };
+            const cat = document.getElementById('category-input').value;
+
+            const newPhoto = {
+                id: 'custom_' + Date.now(),
+                title: document.getElementById('title-input').value.trim(),
+                category: cat,
+                categoryLabel: catMap[cat] || cat,
+                src: uploadedBase64,
+                date: document.getElementById('date-input').value,
+                note: document.getElementById('note-input').value.trim(),
+                isFav: false,
+                isCustom: true
+            };
+
+            photos.unshift(newPhoto);
+            savePhotos();
+            closeUploadModal();
+            applyFilter('all');
+            e.target.reset();
+        }
+
+        /* KEYBOARD & SWIPE LISTENERS */
+        function setupKeyboard() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+                if (e.key === 'Escape') closeLightbox();
+            });
+        }
+
+        function setupSwipe() {
+            const slider = document.getElementById('slider-card');
+            slider.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            slider.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+        }
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 40) nextSlide();
+            if (touchEndX > touchStartX + 40) prevSlide();
+        }
+
+        /* DARK MODE TOGGLE */
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = "fas fa-moon";
+            } else {
+                html.classList.add('dark');
+                icon.className = "fas fa-sun";
+            }
+        }
+
+        /* CANVAS PARTICLES */
+        function initParticles() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let w = canvas.width = window.innerWidth;
+            let h = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            });
+
+            const pts = Array.from({ length: 25 }, () => ({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                r: Math.random() * 2 + 1,
+                alpha: Math.random() * 0.3 + 0.1,
+                vy: -Math.random() * 0.3 - 0.1
+            }));
+
+            function loop() {
+                ctx.clearRect(0, 0, w, h);
+                pts.forEach(p => {
+                    p.y += p.vy;
+                    if (p.y < 0) p.y = h;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(212, 175, 55, ${p.alpha})`;
+                    ctx.fill();
+                });
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+    </script>
+</body>
+</html>
